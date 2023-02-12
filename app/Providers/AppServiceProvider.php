@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Horizon\Horizon;
 
 class AppServiceProvider extends ServiceProvider {
 	/**
@@ -12,6 +14,9 @@ class AppServiceProvider extends ServiceProvider {
 	 */
 	public function register() {
 		//
+		if (app()->isLocal()) {
+			$this->app->register(\VIACreative\SudoSu\ServiceProvider::class);
+		}
 	}
 
 	/**
@@ -24,6 +29,9 @@ class AppServiceProvider extends ServiceProvider {
 		\App\Models\Reply::observe(\App\Observers\ReplyObserver::class);
 		\App\Models\Topic::observe(\App\Observers\TopicObserver::class);
 		\Illuminate\Pagination\Paginator::useBootstrap();
-		//
+
+		Horizon::auth(function ($request) {
+			return Auth::user()->hasRole('Founder');
+		});
 	}
 }
