@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail {
@@ -71,6 +72,20 @@ class User extends Authenticatable implements MustVerifyEmail {
 		$this->notification_count = 0;
 		$this->save();
 		$this->unreadNotifications->markAsRead();
+	}
+
+	public function setPasswordAttribute($value) {
+		if (strlen($value) != 60) {
+			$value = bcrypt($value);
+		}
+		$this->attributes['password'] = $value;
+	}
+
+	public function setAvatarAttribute($path) {
+		if (!Str::startsWith($path, 'http')) {
+			$path = config('app.url') . "/uploads/images/avatars/$path";
+		}
+		$this->attributes['avatar'] = $path;
 	}
 
 }
