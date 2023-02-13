@@ -6,6 +6,7 @@ use App\Handlers\ImageUploadHandler;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TopicRequest;
 use App\Models\Category;
+use App\Models\Link;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,13 +17,15 @@ class TopicsController extends Controller {
 		$this->middleware('auth', ['except' => ['index', 'show']]);
 	}
 
-	public function index(Request $request, Topic $topic, User $user) {
+	public function index(Request $request, Topic $topic, User $user, Link $link) {
 		//$topics = Topic::paginate(30);
 		$topics = $topic->withOrder($request->order)
 			->with('user', 'category')
 			->paginate(30); // N+1 问题
+		$active_users = $user->getActiveUsers();
+		$links = $link->getAllCached();
 
-		return view('topics.index', compact('topics'));
+		return view('topics.index', compact('topics', 'active_users', 'links'));
 	}
 
 	public function show(Request $request, Topic $topic) {
